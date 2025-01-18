@@ -24,7 +24,7 @@ You will need to configure your okta credentials in the `app-config.yaml`.
 catalog:
   providers:
     okta:
-      - orgUrl: 'https://tenant.okta.com'
+      - orgUrl: "https://tenant.okta.com"
         token: ${OKTA_TOKEN}
         schedule:
           frequency:
@@ -45,7 +45,7 @@ following example the `oauth.privateKey` may be passed as either a string encode
 catalog:
   providers:
     okta:
-      - orgUrl: 'https://tenant.okta.com'
+      - orgUrl: "https://tenant.okta.com"
         oauth:
           clientId: ${OKTA_OAUTH_CLIENT_ID},
           keyId: ${OKTA_OAUTH_KEY_ID},
@@ -70,7 +70,7 @@ possible: https://developer.okta.com/docs/reference/core-okta-api/#filter
 catalog:
   providers:
     okta:
-      - orgUrl: 'https://tenant.okta.com'
+      - orgUrl: "https://tenant.okta.com"
         token: ${OKTA_TOKEN}
         userFilter: profile.department eq "engineering"
         groupFilter: profile.name eq "Everyone"
@@ -89,7 +89,7 @@ First, add the required okta-entity-provider dependency to your backend in the `
 
 ```typescript
 backend.add(
-  import('@roadiehq/catalog-backend-module-okta/okta-entity-provider'),
+  import("@roadiehq/catalog-backend-module-okta/okta-entity-provider"),
 );
 ```
 
@@ -106,10 +106,10 @@ To integrate these into your application, add them after the okta-entity-provide
 
 ```typescript
 backend.add(
-  import('@roadiehq/catalog-backend-module-okta/okta-entity-provider'), // The required entity provider
+  import("@roadiehq/catalog-backend-module-okta/okta-entity-provider"), // The required entity provider
 );
 backend.add(
-  import('@roadiehq/catalog-backend-module-okta/org-provider-factory'), // Optional - Load both users and groups
+  import("@roadiehq/catalog-backend-module-okta/org-provider-factory"), // Optional - Load both users and groups
 );
 ```
 
@@ -141,17 +141,17 @@ you can create a new module that will contain the custom entity provider registr
 import {
   createBackendModule,
   coreServices,
-} from '@backstage/backend-plugin-api';
+} from "@backstage/backend-plugin-api";
 import {
   oktaCatalogBackendEntityProviderFactoryExtensionPoint,
   EntityProviderFactory,
   OktaOrgEntityProvider,
-} from '@roadiehq/catalog-backend-module-okta/new-backend';
-import { Config } from '@backstage/config';
+} from "@roadiehq/catalog-backend-module-okta/new-backend";
+import { Config } from "@backstage/config";
 
 export const oktaOrgEntityProviderModule = createBackendModule({
-  pluginId: 'catalog',
-  moduleId: 'default-okta-org-entity-provider',
+  pluginId: "catalog",
+  moduleId: "default-okta-org-entity-provider",
   register(env) {
     env.registerInit({
       deps: {
@@ -162,8 +162,8 @@ export const oktaOrgEntityProviderModule = createBackendModule({
         const factory: EntityProviderFactory = (oktaConfig: Config) =>
           OktaOrgEntityProvider.fromConfig(oktaConfig, {
             logger: logger,
-            userNamingStrategy: 'strip-domain-email',
-            groupNamingStrategy: 'kebab-case-name',
+            userNamingStrategy: "strip-domain-email",
+            groupNamingStrategy: "kebab-case-name",
           });
 
         provider.setEntityProviderFactory(factory);
@@ -194,7 +194,7 @@ discovered entity's `metadata.name` field. The currently supported strategies ar
 You may also choose to implement a custom naming strategy by providing a function.
 
 ```typescript jsx
-export const customUserNamingStrategy: UserNamingStrategy = user =>
+export const customUserNamingStrategy: UserNamingStrategy = (user) =>
   user.profile.customField;
 ```
 
@@ -209,7 +209,7 @@ export const customUserNamingStrategy: UserNamingStrategy = user =>
 You may also choose to implement a custom naming strategy by providing a function.
 
 ```typescript jsx
-export const customGroupNamingStrategy: GroupNamingStrategy = group =>
+export const customGroupNamingStrategy: GroupNamingStrategy = (group) =>
   group.profile.customField;
 ```
 
@@ -221,11 +221,11 @@ You can optionally provide the ability to create a hierarchy of groups by provid
 const factory: EntityProviderFactory = (oktaConfig: Config) =>
   OktaOrgEntityProvider.fromConfig(oktaConfig, {
     logger: logger,
-    userNamingStrategy: 'strip-domain-email',
-    groupNamingStrategy: 'kebab-case-name',
+    userNamingStrategy: "strip-domain-email",
+    groupNamingStrategy: "kebab-case-name",
     hierarchyConfig: {
-      key: 'profile.orgId',
-      parentKey: 'profile.parentOrgId',
+      key: "profile.orgId",
+      parentKey: "profile.parentOrgId",
     },
   });
 ```
@@ -240,9 +240,9 @@ by providing `userTransformer` and `groupTransformer`.
 1. Create a transformer:
 
 ```typescript
-import { GroupNamingStrategy } from '@roadiehq/catalog-backend-module-okta';
-import { GroupEntity } from '@backstage/catalog-model';
-import { Group } from '@okta/okta-sdk-nodejs';
+import { GroupNamingStrategy } from "@roadiehq/catalog-backend-module-okta";
+import { GroupEntity } from "@backstage/catalog-model";
+import { Group } from "@okta/okta-sdk-nodejs";
 
 function myGroupTransformer(
   group: Group,
@@ -255,8 +255,8 @@ function myGroupTransformer(
 ): GroupEntity {
   // Enrich it with your logic
   const groupEntity: GroupEntity = {
-    kind: 'Group',
-    apiVersion: 'backstage.io/v1alpha1',
+    kind: "Group",
+    apiVersion: "backstage.io/v1alpha1",
     metadata: {
       annotations: {
         ...options.annotations,
@@ -264,11 +264,11 @@ function myGroupTransformer(
       name: namingStrategy(group),
       title: group.profile.name,
       title: group.profile.description || group.profile.name,
-      description: group.profile.description || '',
+      description: group.profile.description || "",
     },
     spec: {
       members: options.members,
-      type: 'group',
+      type: "group",
       children: [],
     },
   };
@@ -286,8 +286,8 @@ function myGroupTransformer(
 const factory: EntityProviderFactory = (oktaConfig: Config) =>
   OktaOrgEntityProvider.fromConfig(oktaConfig, {
     logger: logger,
-    userNamingStrategy: 'strip-domain-email',
-    groupNamingStrategy: 'kebab-case-name',
+    userNamingStrategy: "strip-domain-email",
+    groupNamingStrategy: "kebab-case-name",
     groupTransformer: myGroupTransformer,
   });
 ```
@@ -299,7 +299,7 @@ const factory: EntityProviderFactory = (oktaConfig: Config) =>
 <summary>Expand for example legacy configuration</summary>
 
 ```typescript
-import { OktaOrgEntityProvider } from '@roadiehq/catalog-backend-module-okta';
+import { OktaOrgEntityProvider } from "@roadiehq/catalog-backend-module-okta";
 
 export default async function createPlugin(
   env: PluginEnvironment,
@@ -308,8 +308,8 @@ export default async function createPlugin(
 
   const orgProvider = OktaOrgEntityProvider.fromConfig(env.config, {
     logger: env.logger,
-    userNamingStrategy: 'strip-domain-email',
-    groupNamingStrategy: 'kebab-case-name',
+    userNamingStrategy: "strip-domain-email",
+    groupNamingStrategy: "kebab-case-name",
   });
 
   builder.addEntityProvider(orgProvider);
@@ -334,8 +334,8 @@ You can construct your own configuration of OktaUserEntityProvider factory and r
 
 ```typescript
 export const oktaUserEntityProviderModule = createBackendModule({
-  pluginId: 'catalog',
-  moduleId: 'default-okta-user-entity-provider',
+  pluginId: "catalog",
+  moduleId: "default-okta-user-entity-provider",
   register(env) {
     env.registerInit({
       deps: {
@@ -346,7 +346,7 @@ export const oktaUserEntityProviderModule = createBackendModule({
         const factory: EntityProviderFactory = (oktaConfig: Config) =>
           OktaUserEntityProvider.fromConfig(oktaConfig, {
             logger: logger,
-            namingStrategy: 'strip-domain-email',
+            namingStrategy: "strip-domain-email",
           });
 
         provider.setEntityProviderFactory(factory);
@@ -370,7 +370,7 @@ discovered entity's `metadata.name` field. The currently supported strategies ar
 You may also choose to implement a custom naming strategy by providing a function.
 
 ```typescript jsx
-export const customUserNamingStrategy: UserNamingStrategy = user =>
+export const customUserNamingStrategy: UserNamingStrategy = (user) =>
   user.profile.customField;
 ```
 
@@ -380,9 +380,9 @@ In case you want to customize the emitted entities, the provider allows to pass 
 1. Create a transformer:
 
 ```typescript
-import { UserEntity } from '@backstage/catalog-model';
-import { User } from '@okta/okta-sdk-nodejs';
-import { UserNamingStrategy } from '@roadiehq/catalog-backend-module-okta';
+import { UserEntity } from "@backstage/catalog-model";
+import { User } from "@okta/okta-sdk-nodejs";
+import { UserNamingStrategy } from "@roadiehq/catalog-backend-module-okta";
 
 function myUserTransformer(
   user: User,
@@ -391,8 +391,8 @@ function myUserTransformer(
 ): UserEntity {
   // Enrich it with your logic
   return {
-    kind: 'User',
-    apiVersion: 'backstage.io/v1alpha1',
+    kind: "User",
+    apiVersion: "backstage.io/v1alpha1",
     metadata: {
       annotations: { ...options.annotations },
       name: namingStrategy(user),
@@ -428,8 +428,8 @@ You can manually construct your own configuration of OktaGroupEntityProvider fac
 
 ```typescript
 export const oktaGroupEntityProviderModule = createBackendModule({
-  pluginId: 'catalog',
-  moduleId: 'default-okta-group-entity-provider',
+  pluginId: "catalog",
+  moduleId: "default-okta-group-entity-provider",
   register(env) {
     env.registerInit({
       deps: {
@@ -440,8 +440,8 @@ export const oktaGroupEntityProviderModule = createBackendModule({
         const factory: EntityProviderFactory = (oktaConfig: Config) =>
           OktaGroupEntityProvider.fromConfig(oktaConfig, {
             logger: logger,
-            userNamingStrategy: 'strip-domain-email',
-            namingStrategy: 'kebab-case-name',
+            userNamingStrategy: "strip-domain-email",
+            namingStrategy: "kebab-case-name",
           });
 
         provider.setEntityProviderFactory(factory);
@@ -463,7 +463,7 @@ User naming strategies:
 You may also choose to implement a custom naming strategy by providing a function.
 
 ```typescript jsx
-export const customUserNamingStrategy: UserNamingStrategy = user =>
+export const customUserNamingStrategy: UserNamingStrategy = (user) =>
   user.profile.customField;
 ```
 
@@ -478,7 +478,7 @@ Group naming strategies:
 You may also choose to implement a custom naming strategy by providing a function.
 
 ```typescript jsx
-export const customGroupNamingStrategy: GroupNamingStrategy = group =>
+export const customGroupNamingStrategy: GroupNamingStrategy = (group) =>
   group.profile.customField;
 ```
 
@@ -493,9 +493,9 @@ In case you want to customize the emitted entities, the provider allows to pass 
 1. Create a transformer:
 
 ```typescript
-import { GroupNamingStrategy } from '@roadiehq/catalog-backend-module-okta';
-import { GroupEntity } from '@backstage/catalog-model';
-import { Group } from '@okta/okta-sdk-nodejs';
+import { GroupNamingStrategy } from "@roadiehq/catalog-backend-module-okta";
+import { GroupEntity } from "@backstage/catalog-model";
+import { Group } from "@okta/okta-sdk-nodejs";
 
 function myGroupTransformer(
   group: Group,
@@ -508,8 +508,8 @@ function myGroupTransformer(
 ): GroupEntity {
   // Enrich it with your logic
   const groupEntity: GroupEntity = {
-    kind: 'Group',
-    apiVersion: 'backstage.io/v1alpha1',
+    kind: "Group",
+    apiVersion: "backstage.io/v1alpha1",
     metadata: {
       annotations: {
         ...options.annotations,
@@ -517,11 +517,11 @@ function myGroupTransformer(
       name: namingStrategy(group),
       title: group.profile.name,
       title: group.profile.description || group.profile.name,
-      description: group.profile.description || '',
+      description: group.profile.description || "",
     },
     spec: {
       members: options.members,
-      type: 'group',
+      type: "group",
       children: [],
     },
   };
@@ -537,8 +537,8 @@ function myGroupTransformer(
 
 ```typescript
 export const oktaGroupEntityProviderModule = createBackendModule({
-  pluginId: 'catalog',
-  moduleId: 'default-okta-group-entity-provider',
+  pluginId: "catalog",
+  moduleId: "default-okta-group-entity-provider",
   register(env) {
     env.registerInit({
       deps: {
@@ -549,8 +549,8 @@ export const oktaGroupEntityProviderModule = createBackendModule({
         const factory: EntityProviderFactory = (oktaConfig: Config) =>
           OktaGroupEntityProvider.fromConfig(oktaConfig, {
             logger: logger,
-            userNamingStrategy: 'strip-domain-email',
-            namingStrategy: 'kebab-case-name',
+            userNamingStrategy: "strip-domain-email",
+            namingStrategy: "kebab-case-name",
             groupTransformer: myGroupTransformer,
           });
 

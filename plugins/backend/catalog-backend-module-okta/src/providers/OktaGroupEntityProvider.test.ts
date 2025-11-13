@@ -25,11 +25,19 @@ let listGroups: () => MockOktaCollection = () => {
   return new MockOktaCollection([]);
 };
 
+const listGroupUsers = ({ groupId }: { groupId: string }) => {
+  const group = listGroups().items.find((g: any) => g.id === groupId);
+  return group?.listUsers?.() ?? new MockOktaCollection([]);
+};
+
 jest.mock('@okta/okta-sdk-nodejs', () => {
   return {
     Client: jest.fn().mockImplementation(() => {
       return {
-        listGroups,
+        groupApi: {
+          listGroups,
+          listGroupUsers,
+        },
       };
     }),
   };
@@ -468,12 +476,13 @@ describe('OktaGroupProvider', () => {
           metadata: {
             annotations: { ...options.annotations },
             name: namingStrategy(group),
-            title: group.profile.name,
-            description: group.profile.description || '',
+            title: group?.profile?.name || 'fallBack',
+            description: group?.profile?.description || '',
           },
           spec: {
             profile: {
-              displayName: group.profile.displayName as string,
+              displayName:
+                (group?.profile?.displayName as string) || 'fallBack',
             },
             members: options.members,
             type: 'group',

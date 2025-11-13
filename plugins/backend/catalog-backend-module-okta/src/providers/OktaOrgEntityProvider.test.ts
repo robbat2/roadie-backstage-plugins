@@ -55,12 +55,22 @@ let listUsers: () => MockOktaCollection = () => {
   return new MockOktaCollection(allUsers);
 };
 
+const listGroupUsers = ({ groupId }: { groupId: string }) => {
+  const group = listGroups().items.find((g: any) => g.id === groupId);
+  return group?.listUsers?.() ?? new MockOktaCollection([]);
+};
+
 jest.mock('@okta/okta-sdk-nodejs', () => {
   return {
     Client: jest.fn().mockImplementation(() => {
       return {
-        listGroups,
-        listUsers,
+        userApi: {
+          listUsers,
+        },
+        groupApi: {
+          listGroups,
+          listGroupUsers,
+        },
       };
     }),
   };
@@ -411,7 +421,7 @@ describe('OktaOrgEntityProvider', () => {
       listGroups = () => {
         return new MockOktaCollection([
           {
-            id: 'asdfwefwefwef',
+            id: 'group-everyone',
             profile: {
               name: 'Everyone@the-company',
               description: 'Everyone in the company',
@@ -436,7 +446,7 @@ describe('OktaOrgEntityProvider', () => {
             },
           },
           {
-            id: 'asdfwefwefwef',
+            id: 'group-some',
             profile: {
               name: 'Some@the-company',
               description: 'Some in the company',
@@ -510,7 +520,7 @@ describe('OktaOrgEntityProvider', () => {
       listGroups = () => {
         return new MockOktaCollection([
           {
-            id: 'asdfwefwefwef',
+            id: 'group-everyone',
             profile: {
               name: 'Everyone@the-company',
               description: 'Everyone in the company',
@@ -535,7 +545,7 @@ describe('OktaOrgEntityProvider', () => {
             },
           },
           {
-            id: 'asdfwefwefwef',
+            id: 'group-some',
             profile: {
               name: 'Some@the-company',
               description: 'Some in the company',
@@ -573,12 +583,12 @@ describe('OktaOrgEntityProvider', () => {
             entity: expect.objectContaining({
               kind: 'Group',
               metadata: expect.objectContaining({
-                name: 'asdfwefwefwef',
+                name: 'group-everyone',
                 title: 'Everyone@the-company',
               }),
               spec: expect.objectContaining({
                 members: ['user-1', 'user-2'],
-                parent: 'asdfwefwefwef',
+                parent: 'group-everyone',
               }),
             }),
           }),
@@ -586,12 +596,12 @@ describe('OktaOrgEntityProvider', () => {
             entity: expect.objectContaining({
               kind: 'Group',
               metadata: expect.objectContaining({
-                name: 'asdfwefwefwef',
+                name: 'group-some',
                 title: 'Some@the-company',
               }),
               spec: expect.objectContaining({
                 members: ['user-1'],
-                parent: 'asdfwefwefwef',
+                parent: 'group-everyone',
               }),
             }),
           }),

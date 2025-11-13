@@ -86,9 +86,9 @@ export abstract class OktaEntityProvider implements EntityProvider {
 
   protected getCustomAnnotations(member: User | Group, allowList: string[]) {
     const profileAnnotations: Record<string, string> = {};
-    if (allowList.length) {
+    if (allowList.length && member.profile !== undefined) {
       for (const [key, value] of new Map(Object.entries(member.profile))) {
-        if (allowList.includes(key)) {
+        if (allowList.includes(key) && value !== undefined && value !== null) {
           profileAnnotations[key] = value.toString();
         }
       }

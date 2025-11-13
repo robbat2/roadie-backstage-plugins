@@ -141,18 +141,20 @@ export class OktaGroupEntityProvider extends OktaEntityProvider {
         entries.map(async ([_, group]) => {
           const members: string[] = [];
           try {
-            await group.listUsers().each(user => {
-              try {
-                const userName = this.userNamingStrategy(user);
-                members.push(userName);
-              } catch (e: unknown) {
-                this.logger.warn(
-                  `failed to add user to group: ${
-                    isError(e) ? e.message : 'unknown error'
-                  }`,
-                );
-              }
-            });
+            await client.groupApi
+              .listGroupUsers({ groupId: group.id! })
+              .each(user => {
+                try {
+                  const userName = this.userNamingStrategy(user);
+                  members.push(userName);
+                } catch (e: unknown) {
+                  this.logger.warn(
+                    `failed to add user to group: ${
+                      isError(e) ? e.message : 'unknown error'
+                    }`,
+                  );
+                }
+              });
           } catch (e) {
             this.logger.warn(
               `failed to resolve group membership and add group: ${

@@ -27,7 +27,9 @@ jest.mock('@okta/okta-sdk-nodejs', () => {
   return {
     Client: jest.fn().mockImplementation(() => {
       return {
-        listUsers,
+        userApi: {
+          listUsers,
+        },
       };
     }),
   };

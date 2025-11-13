@@ -144,22 +144,24 @@ export class OktaOrgEntityProvider extends OktaEntityProvider {
 
     const defaultAnnotations = await this.buildDefaultAnnotations();
 
-    await client.listUsers({ search: this.account.userFilter }).each(user => {
-      try {
-        const userName = this.userNamingStrategy(user);
-        userResources[userName] = this.userEntityFromOktaUser(
-          user,
-          this.userNamingStrategy,
-          {
-            annotations: defaultAnnotations,
-          },
-        );
-      } catch (e: unknown) {
-        this.logger.warn(
-          `Failed to add user: ${isError(e) ? e.message : 'unknown error'}`,
-        );
-      }
-    });
+    await client.userApi
+      .listUsers({ search: this.account.userFilter })
+      .each(user => {
+        try {
+          const userName = this.userNamingStrategy(user);
+          userResources[userName] = this.userEntityFromOktaUser(
+            user,
+            this.userNamingStrategy,
+            {
+              annotations: defaultAnnotations,
+            },
+          );
+        } catch (e: unknown) {
+          this.logger.warn(
+            `Failed to add user: ${isError(e) ? e.message : 'unknown error'}`,
+          );
+        }
+      });
 
     providedUserCount = Object.values(userResources).length;
 
@@ -178,20 +180,22 @@ export class OktaOrgEntityProvider extends OktaEntityProvider {
       const promiseResults = await Promise.allSettled(
         chunkOfGroups.map(async group => {
           const members: string[] = [];
-          await group.listUsers().each(user => {
-            try {
-              const userName = this.userNamingStrategy(user);
-              if (userResources[userName]) {
-                members.push(userName);
+          await client.groupApi
+            .listGroupUsers({ groupId: group.id! })
+            .each(user => {
+              try {
+                const userName = this.userNamingStrategy(user);
+                if (userResources[userName]) {
+                  members.push(userName);
+                }
+              } catch (e: unknown) {
+                this.logger.warn(
+                  `failed to add user to group: ${
+                    isError(e) ? e.message : 'unknown error'
+                  }`,
+                );
               }
-            } catch (e: unknown) {
-              this.logger.warn(
-                `failed to add user to group: ${
-                  isError(e) ? e.message : 'unknown error'
-                }`,
-              );
-            }
-          });
+            });
 
           const parentGroup = getParentGroup({
             parentKey: this.hierarchyConfig?.parentKey,
